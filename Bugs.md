@@ -5,11 +5,9 @@
 - **Line Number**: style.css lines- 46-47, 378, 388
 - **Type of Bug / Description**: UI not responsive on both tablet and mobile
 - **Identified**: Identified with visual inspection and chrome developer tool
-- **Fix**: Placed a flex wrap for the containers to wrap when on either tablet or mobile. Adjusted the bars gap for smaller screens
 
 ## Selection of rooms from Dropdown not responding
 
-- **Line Number**:
-- **Type of Bug / Description**:
-- **Identified**:
-- **Fix**:
+- **Line Number**: main.js lines - 206
+- **Type of Bug / Description**: Fixed the room selection functionality to change both the image and temperature accordingly
+- **Identified**: Identified with visual inspection and used my developer tools
