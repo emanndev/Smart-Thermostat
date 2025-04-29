@@ -164,6 +164,7 @@ const setOverlay = (room) => {
   document.querySelector(".room").style.backgroundImage = `${
     room.currTemp < 25 ? coolOverlay : warmOverlay
   }, url('${room.image}')`;
+  
 };
 
 // Set svg accordingly
@@ -240,10 +241,11 @@ defaultSettings.addEventListener("click", function (e) {});
 // Increase and decrease temperature
 document.getElementById("increase").addEventListener("click", () => {
   const room = rooms.find((currRoom) => currRoom.name === selectedRoom);
-  const increaseRoomTemperature = room.increaseTemp;
+  const increaseRoomTemperature = room.increaseTemp();
 
-  if (room.currTemp < 32) {
-    increaseRoomTemperature();
+  if (room.currTemp < 10) {  //fix bug 3 - increase temperature
+    increaseRoomTemperature(); 
+    room.setCurrTemp(room.currTemp);  
   }
 
   setIndicatorPoint(room.currTemp);
@@ -261,10 +263,12 @@ document.getElementById("increase").addEventListener("click", () => {
 
 document.getElementById("reduce").addEventListener("click", () => {
   const room = rooms.find((currRoom) => currRoom.name === selectedRoom);
-  const decreaseRoomTemperature = room.decreaseTemp;
+  // const decreaseRoomTemperature = room.decreaseTemp(); 
+  
 
-  if (room.currTemp > 10) {
-    decreaseRoomTemperature();
+  if (room.currTemp > 10) { //fix bug 4 - decrease temperature
+    // decreaseRoomTemperature();
+    room.decreaseTemp(); 
   }
 
   setIndicatorPoint(room.currTemp);

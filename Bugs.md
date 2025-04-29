@@ -11,3 +11,9 @@
 - **Line Number**: main.js lines - 206
 - **Type of Bug / Description**: Fixed the room selection functionality to change both the image and temperature accordingly
 - **Identified**: Identified with visual inspection and used my developer tools
+
+## Increase and Decrease Temperature functionality
+
+- **Line Number**: main.js lines - 246-249, 262-272
+- **Type of Bug / Description**: Disfunctionality with increase and decrease temperature button
+- **Identified**: Identified using visual inspection
