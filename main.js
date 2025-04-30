@@ -267,48 +267,22 @@ defaultSettings.addEventListener("click", function (e) {
 // Increase and decrease temperature
 document.getElementById("increase").addEventListener("click", () => {
   const room = rooms.find((currRoom) => currRoom.name === selectedRoom);
-  const increaseRoomTemperature = room.increaseTemp();
 
-  if (room.currTemp < 10) {  //fix bug 3 - increase temperature
-    increaseRoomTemperature(); 
-    room.setCurrTemp(room.currTemp);  
+  if (room.currTemp < 32) {  //fix bug 3 - increase temperature
+    room.increaseTemp(); 
+    updateRoomDisplay(room);  
   }
-
-  setIndicatorPoint(room.currTemp);
-  currentTemp.textContent = `${room.currTemp}°`;
-
-  generateRooms();
-
-  setOverlay(room);
-
-  warmBtn.style.backgroundColor = "#d9d9d9";
-  coolBtn.style.backgroundColor = "#d9d9d9";
-
-  document.querySelector(".currentTemp").innerText = `${room.currTemp}°`;
 });
 
 document.getElementById("reduce").addEventListener("click", () => {
   const room = rooms.find((currRoom) => currRoom.name === selectedRoom);
-  // const decreaseRoomTemperature = room.decreaseTemp(); 
-  
 
   if (room.currTemp > 10) { //fix bug 4 - decrease temperature
-    // decreaseRoomTemperature();
     room.decreaseTemp(); 
+    updateRoomDisplay(room);
   }
 
-  setIndicatorPoint(room.currTemp);
-  currentTemp.textContent = `${room.currTemp}°`;
-
-  generateRooms();
-
-  setOverlay(room);
-
-  warmBtn.style.backgroundColor = "#d9d9d9";
-  coolBtn.style.backgroundColor = "#d9d9d9";
-
-  document.querySelector(".currentTemp").innerText = `${room.currTemp}°`;
-});
+ });
 
 const coolBtn = document.getElementById("cool");
 const warmBtn = document.getElementById("warm");
@@ -354,6 +328,7 @@ document.getElementById("save").addEventListener("click", () => {
     coolInput.value = "";
     warmInput.value = "";
      errorSpan.style.display = "none";
+     inputsDiv.classList.add("hidden");
   }
 });
 
@@ -446,3 +421,102 @@ document.querySelector(".rooms-control").addEventListener("click", (e) => {
     setSelectedRoom(e.target.parentNode.parentNode.id);
   }
 });
+
+//Add Room Modal
+
+// 1. Add Room Modal
+const addRoomModal = () => {
+  const modalHTML = `
+    <div class="modal hidden" id="roomModal">
+      <div class="modal-content">
+        <h3>Add New Room</h3>
+        <input type="text" id="newRoomName" placeholder="Room name">
+        <div class="modal-buttons">
+          <button id="addRoom">Add</button>
+          <button id="cancelAddRoom">Cancel</button>
+        </div>
+        <span class="error" id="modalError"></span>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  document.getElementById("newPreset").insertAdjacentHTML('afterend', '<button id="showModal">+ Add Room</button>');
+  
+  document.getElementById("showModal").addEventListener("click", () => {
+    document.getElementById("roomModal").classList.remove("hidden");
+  });
+  
+  document.getElementById("cancelAddRoom").addEventListener("click", () => {
+    document.getElementById("roomModal").classList.add("hidden");
+  });
+  
+  document.getElementById("addRoom").addEventListener("click", () => {
+    const name = document.getElementById("newRoomName").value.trim();
+    const error = document.getElementById("modalError");
+    
+    if (!name) {
+      error.textContent = "Please enter a room name";
+      return;
+    }
+    
+    if (rooms.some(r => r.name === name)) {
+      error.textContent = "Room already exists";
+      return;
+    }
+    
+    const newRoom = {
+      name,
+      currTemp: 22,
+      coldPreset: 20,
+      warmPreset: 28,
+      image: "./assets/default-room.jpg",
+      airConditionerOn: false,
+      startTime: '08:00',
+      endTime: '22:00',
+     
+    setCurrTemp(temp) {
+      this.currTemp = temp;
+    },
+
+    setColdPreset(newCold) {
+      this.coldPreset = newCold;
+    },
+
+    setWarmPreset(newWarm) {
+      this.warmPreset = newWarm;
+    },
+
+    decreaseTemp() {
+      this.currTemp--;
+    },
+
+    increaseTemp() {
+      this.currTemp++;
+    },
+    toggleAircon() {
+      this.airConditionerOn
+        ? (this.airConditionerOn = false)
+        : (this.airConditionerOn = true);
+    },
+    };
+    
+    rooms.push(newRoom);
+    
+    const option = document.createElement("option");
+    option.value = newRoom.name;
+    option.textContent = newRoom.name;
+    roomSelect.appendChild(option);
+    
+    document.getElementById("newRoomName").value = "";
+    document.getElementById("roomModal").classList.add("hidden");
+    generateRooms();
+  });
+};
+
+
+// Initialize new features
+addRoomModal();
+
+// Initialize rooms display
+generateRooms();
