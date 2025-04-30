@@ -23,3 +23,11 @@
 - **Line Number**: main.js - lines: 145 -149
 - **Type of Bug / Description**: Overlays were not transitions in accordance with the change of the temperature.
 - **Identified**: Identified through visual inspection
+
+## Temperature validation for setting default presets and giving error messages
+
+- **Line Number**: main.js - lines: 308-330
+- **Type of Bug / Description**: The default preset was not displaying clear error messages and had to give specific ranges for both cool and warm modes
+- **Identified**: Through Visual testing and Manual testing of entering values in the default presents to check feedback
+
+

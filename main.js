@@ -305,26 +305,27 @@ document.getElementById("save").addEventListener("click", () => {
   const warmInput = document.getElementById("warmInput");
   const errorSpan = document.querySelector(".error");
 
+// Fix bug 1 - change the range of temperatures and display valid error message
   if (coolInput.value && warmInput.value) {
     // Validate the data
-    if (coolInput.value < 10 || coolInput.value > 25) {
+    if (coolInput.value < 10 || coolInput.value > 24) { 
       errorSpan.style.display = "block";
-      errorSpan.innerText = "Enter valid temperatures (10° - 32°)";
+      errorSpan.innerText = "Enter valid temperatures (10° - 24°)";
     }
 
     if (warmInput.value < 25 || warmInput.value > 32) {
       errorSpan.style.display = "block";
-      errorSpan.innerText = "Enter valid temperatures (10° - 32°)";
+      errorSpan.innerText = "Enter valid temperatures (25° - 32°)";
     }
     // Validation passed
     // Set current room's presets
     const currRoom = rooms.find((room) => room.name === selectedRoom);
-
     currRoom.setColdPreset(coolInput.value);
     currRoom.setWarmPreset(warmInput.value);
 
     coolInput.value = "";
     warmInput.value = "";
+     errorSpan.style.display = "none";
   }
 });
 
