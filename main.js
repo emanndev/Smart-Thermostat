@@ -291,9 +291,9 @@ const warmBtn = document.getElementById("warm");
 const inputsDiv = document.querySelector(".inputs");
 // Toggle preset inputs
 document.getElementById("newPreset").addEventListener("click", () => {
-  if (inputsDiv.classList.contains("hidden")) {
+  // if (inputsDiv.classList.contains("hidden")) {
     inputsDiv.classList.remove("hidden");
-  }
+  // }
 });
 
 // close inputs
@@ -322,8 +322,8 @@ document.getElementById("save").addEventListener("click", () => {
     // Validation passed
     // Set current room's presets
     const currRoom = rooms.find((room) => room.name === selectedRoom);
-    currRoom.setColdPreset(coolInput.value);
-    currRoom.setWarmPreset(warmInput.value);
+    currRoom.setColdPreset(parseInt(coolInput.value));
+    currRoom.setWarmPreset(parseInt(warmInput.value));
 
     coolInput.value = "";
     warmInput.value = "";
@@ -340,18 +340,27 @@ const generateRooms = () => {
 
   rooms.forEach((room) => {
     roomsHTML += `
-    <div class="room-control" id="${room.name}">
-          <div class="top">
-            <h3 class="room-name">${room.name} - ${room.currTemp}°</h3>
-            <button class="switch">
-              <ion-icon name="power-outline" class="${
-                room.airConditionerOn ? "powerOn" : ""
-              }"></ion-icon>
-            </button>
-          </div>
-
-          ${displayTime(room)}
-         
+  <div class="room-control" id="${room.name}">
+      <div class="top">
+        <h3 class="room-name">${room.name} - ${room.currTemp}°</h3>
+        <button class="switch">
+          <ion-icon name="power-outline" class="${room.airConditionerOn ? "powerOn" : ""}"></ion-icon>
+        </button>
+      </div>
+      <div class="time-display">
+        <span class="time start-time" contenteditable="true">${room.startTime}</span>
+        <div class="bars">
+          ${Array(32).fill('<span class="bar"></span>').join('')}
+        </div>
+        <span class="time end-time" contenteditable="true">${room.endTime}</span>
+      </div>   
+      <div class="schedule-toggle">
+        <label class="switch">
+          <input type="checkbox" ${room.scheduleActive ? "checked" : ""} data-room="${room.name}">
+          <span class="slider round"></span>
+        </label>
+        <span>Auto Schedule</span>
+      </div>      
           <span class="room-status" style="display: ${ //Bug 5 - fix the room status display
             room.airConditionerOn ? "" : "none"
           }">${room.currTemp > 25 ? "Warming room to: " : "Cooling room to: "}${
@@ -362,7 +371,112 @@ const generateRooms = () => {
   });
 
   roomsControlContainer.innerHTML = roomsHTML;
+
+   // Dynamical add event listeners for editable times
+   document.querySelectorAll('.time').forEach(timeElement => {
+    timeElement.addEventListener('blur', (e) => {
+      const roomControl = e.target.closest('.room-control');
+      const roomName = roomControl.id;
+      const room = rooms.find(r => r.name === roomName);
+      
+      const isStartTime = e.target.classList.contains('start-time');
+      const timeValue = e.target.textContent.trim();
+      
+      // Validate itme format (HH:MM)
+      if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(timeValue)) {
+        if (isStartTime) {
+          room.startTime = timeValue;
+        } else {
+          room.endTime = timeValue;
+        }
+      } else {
+        // Revert to previous time if invalid
+        e.target.textContent = isStartTime ? room.startTime : room.endTime;
+      }
+    });
+  });
+
+  // Event listeners for schedule toggles
+  document.querySelectorAll('.schedule-toggle input').forEach(toggle => {
+    toggle.addEventListener('change', (e) => {
+      const room = rooms.find(r => r.name === e.target.dataset.room);
+      room.scheduleActive = e.target.checked;
+    });
+  });
 };
+rooms.forEach(room => {
+  room.scheduleActive = false;
+});
+
+// Add styles for the toggle switch and time display
+const style = document.createElement('style');
+style.textContent = `
+/* Schedule Toggle Switch */
+.schedule-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--cool-blue);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.time[contenteditable="true"] {
+  padding: 2px 5px;
+  border-radius: 3px;
+  outline: none;
+}
+
+.time[contenteditable="true"]:focus {
+  background-color: #f0f0f0;
+  box-shadow: 0 0 0 1px var(--cool-blue);
+}
+`;
+document.head.appendChild(style);
+
 const displayTime = (room) => {
   return `
       <div class="time-display">
@@ -515,8 +629,76 @@ const addRoomModal = () => {
 };
 
 
+
+// Click event handlers to time displays
+const setupTimeDisplayInteractions = () => {
+  document.querySelector('.rooms-control').addEventListener('click', (e) => {
+    const timeElement = e.target.closest('.time');
+    if (!timeElement) return;
+    
+    const roomControl = e.target.closest('.room-control');
+    const roomName = roomControl.id;
+    const room = rooms.find(r => r.name === roomName);
+    
+    const isStartTime = timeElement.classList.contains('start-time');
+    const timeType = isStartTime ? 'startTime' : 'endTime';
+    
+    // Creating time input
+    const input = document.createElement('input');
+    input.type = 'time';
+    input.value = room[timeType];
+    input.className = 'time-edit';
+    
+    // Replace time display with input
+    timeElement.replaceWith(input);
+    input.focus();
+    
+    const handleTimeChange = () => {
+      if (input.value) {
+        room[timeType] = input.value;
+        generateRooms();
+        
+        // Re-enable scheduling check
+        if (room.schedulePreset) {
+          checkScheduledTimes();
+        }
+      }
+      input.replaceWith(timeElement);
+    };
+    
+    input.addEventListener('change', handleTimeChange);
+    input.addEventListener('blur', handleTimeChange);
+  });
+};
+
+// function to check scheduled times
+const checkScheduledTimes = () => {
+  const now = new Date();
+  const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+  
+  rooms.forEach(room => {
+    if (!room.scheduleActive) return;
+    
+    if (currentTime === room.startTime && !room.airConditionerOn) {
+      room.toggleAircon();
+      // Set to cold preset if current temp is high, warm preset if low
+      room.setCurrTemp(room.currTemp > 25 ? room.coldPreset : room.warmPreset);
+      generateRooms();
+    } else if (currentTime === room.endTime && room.airConditionerOn) {
+      room.toggleAircon();
+      generateRooms();
+    }
+  });
+};
+
+
+// Initialize
+setupTimeDisplayInteractions();
+setInterval(checkScheduledTimes, 60000); // Check every minute
+
 // Initialize new features
 addRoomModal();
+addScheduling();
 
 // Initialize rooms display
 generateRooms();
