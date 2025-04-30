@@ -30,4 +30,8 @@
 - **Type of Bug / Description**: The default preset was not displaying clear error messages and had to give specific ranges for both cool and warm modes
 - **Identified**: Through Visual testing and Manual testing of entering values in the default presents to check feedback
 
+## AC on feedback according to the range
 
+- **Line Number**: main.js - lines: 352
+- **Type of Bug / Description**: The bug was from the html being populated in the generateRooms function where the condition output for the ternary opearator was interchanged.
+- **Identified**: Through testing my UI and manual testing by turning on the AC and checking the response given in each range I set.
