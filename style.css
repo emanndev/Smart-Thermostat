@@ -64,6 +64,46 @@ body {
   font-size: 20px;
 }
 
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Global AC Controls */
+.global-ac-controls {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.circle-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--cool-blue);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.circle-btn:hover {
+  transform: scale(1.1);
+}
+
+
 #rooms {
   border: none;
   background: none;

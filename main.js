@@ -165,6 +165,18 @@ const setOverlay = (room) => {
   
 };
 
+
+// Helper functions (minimal changes)
+function updateRoomDisplay(room) {
+  currentTemp.textContent = `${room.currTemp}°`;
+  document.querySelector(".currentTemp").innerText = `${room.currTemp}°`;
+  document.querySelector(".room-name").innerText = room.name;
+  setOverlay(room);
+  setIndicatorPoint(room.currTemp);
+  generateRooms();
+}
+
+
 // Set svg accordingly
 const svgPoint = document.querySelector(".point");
 const angleOffset = 86;
@@ -211,6 +223,7 @@ rooms.forEach((room) => {
 
 const setSelectedRoom = (selectedRoom) => {
   const room = rooms.find((currRoom) => currRoom.name === selectedRoom);
+  if (!room) return;
   setIndicatorPoint(room.currTemp);
 
   //   set the current stats to current room temperature
@@ -232,9 +245,24 @@ roomSelect.addEventListener("change", function () {
 });
 
 
-// Set preset temperatures
+// Set preset temperatures with event delegation
 const defaultSettings = document.querySelector(".default-settings");
-defaultSettings.addEventListener("click", function (e) {});
+defaultSettings.addEventListener("click", function (e) {
+  const room = rooms.find((currRoom) => currRoom.name === selectedRoom);
+  const target = e.target.closest('button');
+  
+  if (target?.id === 'cool') {
+    room.setCurrTemp(room.coldPreset);
+    document.getElementById("cool").style.backgroundColor = "#c2c2c2";
+    document.getElementById("warm").style.backgroundColor = "#d9d9d9";
+    updateRoomDisplay(room);
+  } else if (target?.id === 'warm') {
+    room.setCurrTemp(room.warmPreset);
+    document.getElementById("warm").style.backgroundColor = "#c2c2c2";
+    document.getElementById("cool").style.backgroundColor = "#d9d9d9";
+    updateRoomDisplay(room);
+  }
+});
 
 // Increase and decrease temperature
 document.getElementById("increase").addEventListener("click", () => {
