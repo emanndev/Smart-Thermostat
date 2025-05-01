@@ -1,3 +1,5 @@
+
+
 // Room objects
 const rooms = [
   {
@@ -835,3 +837,4 @@ addAllACsButton();
 
 // Initialize rooms display
 generateRooms();
+
