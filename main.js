@@ -532,34 +532,69 @@ document.querySelector(".rooms-control").addEventListener("click", (e) => {
 // Add Room Modal
 const addRoomModal = () => {
   const modalHTML = `
-    <div class="modal hidden" id="roomModal">
-      <div class="modal-content">
+   <div class="modal hidden" id="roomModal">
+      <div class="modal-content animate__animated">
         <h3>Add New Room</h3>
-        <input type="text" id="newRoomName" placeholder="Room name">
-        <div class="modal-buttons">
-          <button id="addRoom">Add</button>
-          <button id="cancelAddRoom">Cancel</button>
+        <div class="modal-inputs">
+          <input type="text" id="newRoomName" placeholder="Room name" required>
+          <div class="image-upload">
+            <label for="roomImage">Room Image:</label>
+            <input type="file" id="roomImage" accept="image/*">
+            <div class="image-preview hidden" id="imagePreview"></div>
+          </div>
         </div>
+        <div class="modal-buttons">
+          <button id="addRoom" class="modal-btn confirm">Add Room</button>
+          <button id="cancelAddRoom" class="modal-btn cancel">Cancel</button>
+        </div>
+        <div class="modal-feedback hidden" id="modalFeedback"></div>
         <span class="error" id="modalError"></span>
       </div>
     </div>
   `;
   document.body.insertAdjacentHTML('beforeend', modalHTML);
   
-  document.getElementById("newPreset").insertAdjacentHTML('afterend', '<button id="showModal">+ Add Room</button>');
+  document.querySelector(".text").insertAdjacentHTML('afterend', 
+    '<button id="showModal">+</button>');
   
   document.getElementById("showModal").addEventListener("click", () => {
-    document.getElementById("roomModal").classList.remove("hidden");
+    const modal = document.getElementById("roomModal");
+    modal.classList.remove("hidden");
+    modal.querySelector(".modal-content").classList.add("animate__fadeInDown");
   });
-  
+    // Image preview functionality
+    document.getElementById("roomImage").addEventListener("change", function(e) {
+      const preview = document.getElementById("imagePreview");
+      const file = e.target.files[0];
+      
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.innerHTML = `<img src="${e.target.result}" alt="Room preview">`;
+          preview.classList.remove("hidden");
+        }
+        reader.readAsDataURL(file);
+      }
+    });
   document.getElementById("cancelAddRoom").addEventListener("click", () => {
-    document.getElementById("roomModal").classList.add("hidden");
+    const modalContent = document.querySelector(".modal-content");
+    modalContent.classList.remove("animate__fadeInDown");
+    modalContent.classList.add("animate__fadeOutUp");
+    
+    setTimeout(() => {
+      document.getElementById("roomModal").classList.add("hidden");
+      modalContent.classList.remove("animate__fadeOutUp");
+      resetModal();
+    }, 500);
   });
   
   document.getElementById("addRoom").addEventListener("click", () => {
     const name = document.getElementById("newRoomName").value.trim();
+    const imageInput = document.getElementById("roomImage");
     const error = document.getElementById("modalError");
+    const feedback = document.getElementById("modalFeedback");
     
+    // Validation
     if (!name) {
       error.textContent = "Please enter a room name";
       return;
@@ -605,18 +640,56 @@ const addRoomModal = () => {
         : (this.airConditionerOn = true);
     },
     };
-    
-    rooms.push(newRoom);
-    
-    const option = document.createElement("option");
-    option.value = newRoom.name;
-    option.textContent = newRoom.name;
-    roomSelect.appendChild(option);
-    
-    document.getElementById("newRoomName").value = "";
-    document.getElementById("roomModal").classList.add("hidden");
-    generateRooms();
-  });
+ // Handle image upload if available
+ if (imageInput.files.length > 0) {
+  const file = imageInput.files[0];
+  const reader = new FileReader();
+  
+  reader.onload = function(e) {
+    newRoom.image = e.target.result; // Store as data URL
+    completeRoomAddition(newRoom, feedback);
+  };
+  reader.readAsDataURL(file);
+} else {
+  completeRoomAddition(newRoom, feedback);
+}
+});
+
+// Helper functions
+function completeRoomAddition(room, feedback) {
+rooms.push(room);
+
+// Add to dropdown
+const option = document.createElement("option");
+option.value = room.name;
+option.textContent = room.name;
+roomSelect.appendChild(option);
+
+// Show success feedback
+feedback.textContent = `${room.name} added successfully!`;
+feedback.className = "modal-feedback success";
+feedback.classList.remove("hidden");
+
+// Animate and close
+const modalContent = document.querySelector(".modal-content");
+modalContent.classList.remove("animate__fadeInDown");
+modalContent.classList.add("animate__bounce");
+
+setTimeout(() => {
+  document.getElementById("roomModal").classList.add("hidden");
+  modalContent.classList.remove("animate__bounce");
+  resetModal();
+  generateRooms();
+}, 1500);
+}
+
+function resetModal() {
+document.getElementById("newRoomName").value = "";
+document.getElementById("roomImage").value = "";
+document.getElementById("imagePreview").classList.add("hidden");
+document.getElementById("modalError").textContent = "";
+document.getElementById("modalFeedback").classList.add("hidden");
+}
 };
 
 
