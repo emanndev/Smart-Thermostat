@@ -6,11 +6,13 @@
     "test": "jest --coverage --watchAll",
     "test:ci": "jest --coverage"
   },
-  "jest": {
+  "jest":{
     "testEnvironment": "jest-environment-jsdom",
+    "testMatch": ["**/tests/**/*.test.js"],
     "transformIgnorePatterns": [
       "node_modules/(?!@testing-library|your-other-esm-packages)"
     ],
+    
     "transform": {
       "^.+\\.(js|jsx)$": "babel-jest"
     },

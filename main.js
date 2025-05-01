@@ -143,6 +143,50 @@ const rooms = [
     },
   },
 ];
+
+const loadRoomsFromStorage = () => {
+  const savedRooms = localStorage.getItem('smartHomeRooms');
+  if (savedRooms) {
+    try {
+      const parsedRooms = JSON.parse(savedRooms);
+      // Clear the default rooms if we have saved ones
+      rooms.length = 0;
+      parsedRooms.forEach(room => {
+        // Restore methods for each room
+        rooms.push({
+          ...room,
+          setCurrTemp(temp) { this.currTemp = temp; },
+          setColdPreset(newCold) { this.coldPreset = newCold; },
+          setWarmPreset(newWarm) { this.warmPreset = newWarm; },
+          decreaseTemp() { this.currTemp--; },
+          increaseTemp() { this.currTemp++; },
+          toggleAircon() { this.airConditionerOn = !this.airConditionerOn; }
+        });
+      });
+    } catch (e) {
+      console.error('Failed to load rooms from storage', e);
+    }
+  }
+};
+
+// Save rooms to localStorage
+const saveRoomsToStorage = () => {
+  // Convert to plain objects without methods for storage
+  const roomsToSave = rooms.map(room => {
+    const { name, currTemp, coldPreset, warmPreset, image, airConditionerOn, startTime, endTime, scheduleActive } = room;
+    return { name, currTemp, coldPreset, warmPreset, image, airConditionerOn, startTime, endTime, scheduleActive };
+  });
+  localStorage.setItem('smartHomeRooms', JSON.stringify(roomsToSave));
+};
+
+// Call this at startup
+loadRoomsFromStorage();
+
+
+
+
+
+
 //  Fix bug with warming and cooling image overlays - bug 4
 const coolOverlay= `linear-gradient(
     to bottom, rgba(141, 158, 247, 0.2), rgba(194, 197, 215, 0.1))`;
@@ -273,6 +317,7 @@ document.getElementById("increase").addEventListener("click", () => {
   if (room.currTemp < 32) {  //fix bug 3 - increase temperature
     room.increaseTemp(); 
     updateRoomDisplay(room);  
+    saveRoomsToStorage();
   }
 });
 
@@ -282,6 +327,7 @@ document.getElementById("reduce").addEventListener("click", () => {
   if (room.currTemp > 10) { //fix bug 4 - decrease temperature
     room.decreaseTemp(); 
     updateRoomDisplay(room);
+    saveRoomsToStorage();
   }
 
  });
@@ -337,7 +383,7 @@ const generateRooms = () => {
  <div class="room-control" id="${room.name}">
       <div class="top">
         <h3 class="room-name">${room.name} - ${room.currTemp}°</h3>
-        <button class="switch">
+        <button class="switch" title="Toggle AC">
           <ion-icon name="power-outline" class="${room.airConditionerOn ? "powerOn" : ""}"></ion-icon>
         </button>
       </div>
@@ -364,6 +410,9 @@ const generateRooms = () => {
 
   roomsControlContainer.innerHTML = roomsHTML;
 
+  // Update the visual timers after generating rooms
+  updateVisualTimers();
+
    // Dynamical add event listeners for editable times
    document.querySelectorAll('.time').forEach(timeElement => {
     timeElement.addEventListener('blur', (e) => {
@@ -381,6 +430,7 @@ const generateRooms = () => {
         } else {
           room.endTime = timeValue;
         }
+        updateVisualTimers(); // Refresh the visual timer
       } else {
         // Revert to previous time if invalid
         e.target.textContent = isStartTime ? room.startTime : room.endTime;
@@ -395,79 +445,13 @@ const generateRooms = () => {
       room.scheduleActive = e.target.checked;
     });
   });
+
+  saveRoomsToStorage();
 };
 rooms.forEach(room => {
   room.scheduleActive = false;
 });
 
-// Add styles for the toggle switch and time display
-const style = document.createElement('style');
-style.textContent = `
-/* Schedule Toggle Switch */
-.schedule-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 24px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 24px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: var(--cool-blue);
-}
-
-input:checked + .slider:before {
-  transform: translateX(26px);
-}
-
-.time[contenteditable="true"] {
-  padding: 2px 5px;
-  border-radius: 3px;
-  outline: none;
-}
-
-.time[contenteditable="true"]:focus {
-  background-color: #f0f0f0;
-  box-shadow: 0 0 0 1px var(--cool-blue);
-}
-`;
-document.head.appendChild(style);
 
 const displayTime = (room) => {
   return `
@@ -646,7 +630,6 @@ const addAllACsButton = () => {
     setTimeout(() => allOffBtn.classList.remove('active'), 1000);
   });
 };
-
 //Add Room Modal
 const addRoomModal = () => {
   const modalHTML = `
@@ -675,21 +658,87 @@ const addRoomModal = () => {
   `;
   
   document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+  // Room management button with dropdown
+  const roomManagementHTML = `
+    <div class="room-management">
+      <button id="roomManagementBtn" title="Manage rooms">
+        <ion-icon name="add-outline"></ion-icon>
+      </button>
+      <div class="room-management-dropdown hidden">
+        <button id="addRoomBtn">
+          <ion-icon name="add-outline"></ion-icon> Add Room
+        </button>
+        <button id="deleteRoomBtn" class="delete">
+          <ion-icon name="trash-outline"></ion-icon> Delete Room
+        </button>
+      </div>
+    </div>
+  `;
   
-  // Show modal button
-  document.querySelector(".text").insertAdjacentHTML('beforebegin', 
-    '<button id="showModal" title="Add new room"><ion-icon name="add-outline"></ion-icon></button>');
+  document.querySelector(".text").insertAdjacentHTML('afterend', roomManagementHTML);
+
+  // Toggle dropdown visibility
+  const roomManagementBtn = document.getElementById('roomManagementBtn');
+  const dropdown = document.querySelector('.room-management-dropdown');
   
-  // Modal toggle functionality
-  const modal = document.getElementById("roomModal");
-  const modalContent = modal.querySelector(".modal-content");
-  
-  document.getElementById("showModal").addEventListener("click", () => {
-    modal.classList.add("active");
-    modalContent.style.animation = "slideInDown 0.3s forwards";
-    console.log('clicked')
+  roomManagementBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle('hidden');
+  });
+
+  // Close dropdown when clicking elsewhere
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.room-management')) {
+      dropdown.classList.add('hidden');
+    }
   });
   
+  // Add room button in dropdown
+  document.getElementById('addRoomBtn').addEventListener('click', () => {
+    dropdown.classList.add('hidden');
+    const modal = document.getElementById("roomModal");
+    const modalContent = modal.querySelector(".modal-content");
+    modal.classList.add("active");
+    modalContent.style.animation = "slideInDown 0.3s forwards";
+  });
+  
+  // Delete room button in dropdown
+  document.getElementById('deleteRoomBtn').addEventListener('click', () => {
+    dropdown.classList.add('hidden');
+    const roomName = prompt('Enter the name of the room to delete:');
+    if (roomName) {
+      const roomIndex = rooms.findIndex(r => r.name === roomName);
+      if (roomIndex !== -1) {
+        rooms.splice(roomIndex, 1);
+        saveRoomsToStorage();
+        
+        // Update UI
+        generateRooms();
+        
+        // Update dropdown
+        const options = roomSelect.querySelectorAll('option');
+        options.forEach(option => {
+          if (option.value === roomName) {
+            option.remove();
+          }
+        });
+        
+        // If deleted room was selected, it selects first room
+        if (selectedRoom === roomName) {
+          selectedRoom = rooms[0]?.name || '';
+          if (rooms.length > 0) {
+            setSelectedRoom(selectedRoom);
+          }
+        }
+        
+        alert(`Room "${roomName}" deleted successfully.`);
+      } else {
+        alert(`Room "${roomName}" not found.`);
+      }
+    }
+  });
+
   // Image preview 
   document.getElementById("roomImage").addEventListener("change", function(e) {
     const preview = document.getElementById("imagePreview");
@@ -708,9 +757,10 @@ const addRoomModal = () => {
   
   // Close modal functionality
   document.getElementById("cancelAddRoom").addEventListener("click", () => {
+    const modalContent = document.querySelector(".modal-content");
     modalContent.style.animation = "slideOutUp 0.3s forwards";
     setTimeout(() => {
-      modal.classList.remove("active");
+      document.getElementById("roomModal").classList.remove("active");
       resetModal();
     }, 300);
   });
@@ -732,7 +782,6 @@ const addRoomModal = () => {
       return;
     }
     
-   
     const newRoom = {
       name,
       currTemp: 22,
@@ -769,6 +818,7 @@ const addRoomModal = () => {
   // Helper functions
   function completeRoomAddition(room, feedback) {
     rooms.push(room);
+    saveRoomsToStorage();
     
     // Add to dropdown
     const option = document.createElement("option");
@@ -778,13 +828,13 @@ const addRoomModal = () => {
     
     // Success feedback
     showFeedback(feedback, `${room.name} added successfully!`, "success");
-    modalContent.classList.add("animate-bounce");
+    document.querySelector(".modal-content").classList.add("animate-bounce");
     
     // Close after delay
     setTimeout(() => {
-      modalContent.style.animation = "slideOutUp 0.3s forwards";
+      document.querySelector(".modal-content").style.animation = "slideOutUp 0.3s forwards";
       setTimeout(() => {
-        modal.classList.remove("active");
+        document.getElementById("roomModal").classList.remove("active");
         resetModal();
         generateRooms();
       }, 300);
@@ -803,28 +853,82 @@ const addRoomModal = () => {
       }, 3000);
     }
   }
-  
+  //reset modal function
   function resetModal() {
     document.getElementById("newRoomName").value = "";
     document.getElementById("roomImage").value = "";
     document.getElementById("imagePreview").innerHTML = "";
     document.getElementById("imagePreview").classList.add("hidden");
     document.getElementById("modalFeedback").className = "modal-feedback";
-    modalContent.classList.remove("animate-bounce");
+    document.querySelector(".modal-content").classList.remove("animate-bounce");
   }
   
   // Close modal when clicking outside
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) {
-      modalContent.style.animation = "slideOutUp 0.3s forwards";
+  document.getElementById("roomModal").addEventListener("click", (e) => {
+    if (e.target === document.getElementById("roomModal")) {
+      document.querySelector(".modal-content").style.animation = "slideOutUp 0.3s forwards";
       setTimeout(() => {
-        modal.classList.remove("active");
+        document.getElementById("roomModal").classList.remove("active");
         resetModal();
       }, 300);
     }
   });
 };
 
+// Function to update bar according to timers
+function updateVisualTimers() {
+  const now = new Date();
+  const currentHours = now.getHours();
+  const currentMinutes = now.getMinutes();
+  const currentTotalMinutes = currentHours * 60 + currentMinutes;
+
+  rooms.forEach(room => {
+    const roomElement = document.getElementById(room.name);
+    if (!roomElement) return;
+
+    // This parses start and end times 
+    const [startHours, startMinutes] = room.startTime.split(':').map(Number);
+    const [endHours, endMinutes] = room.endTime.split(':').map(Number);
+    
+    const startTotalMinutes = startHours * 60 + startMinutes;
+    const endTotalMinutes = endHours * 60 + endMinutes;
+    
+    // Calculate total duration in minutes
+    const totalDuration = endTotalMinutes - startTotalMinutes;
+    if (totalDuration <= 0) return; 
+    
+    // Calculate current progress
+    let progress = (currentTotalMinutes - startTotalMinutes) / totalDuration;
+    progress = Math.max(0, Math.min(1, progress));
+    
+    // Get all bars for this room
+    const bars = roomElement.querySelectorAll('.bar');
+    if (!bars.length) return;
+    
+    // Calculate how many bars should be active
+    const activeBarCount = Math.round(progress * bars.length);
+    const currentBarIndex = Math.floor(progress * bars.length);
+    
+    // Update bars
+    bars.forEach((bar, index) => {
+      bar.classList.remove('active', 'current');
+      
+      if (index < activeBarCount) {
+        bar.classList.add('active');
+      }
+      
+      if (index === currentBarIndex && progress > 0 && progress < 1) {
+        bar.classList.add('current');
+      }
+    });
+  });
+}
+
+// Update the visual timers every minute
+setInterval(updateVisualTimers, 60000);
+
+// Also update them whenever the page loads or when times are changed
+document.addEventListener('DOMContentLoaded', updateVisualTimers);
 
 // Initialize Time display 
 setupTimeDisplayInteractions();
@@ -837,4 +941,5 @@ addAllACsButton();
 
 // Initialize rooms display
 generateRooms();
+
 

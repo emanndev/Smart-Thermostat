@@ -347,6 +347,69 @@ body {
   margin-top: 15px;
 }
 
+.schedule-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--cool-blue);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.time[contenteditable="true"] {
+  padding: 2px 5px;
+  border-radius: 3px;
+  outline: none;
+}
+
+.time[contenteditable="true"]:focus {
+  background-color: #f0f0f0;
+  box-shadow: 0 0 0 1px var(--cool-blue);
+}
+
 
 .time-inputs {
   display: flex;
@@ -737,6 +800,66 @@ svg.point {
   pointer-events: none;
 }
 
+
+.room-management {
+  position: relative;
+  display: inline-block;
+}
+
+.room-management-dropdown {
+  position: absolute;
+  background-color: white;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  border-radius: 4px;
+  overflow: hidden;
+ left: 30%;
+  top: 100%;
+}
+
+.room-management-dropdown button {
+  width: 100%;
+  text-align: left;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.room-management-dropdown button:hover {
+  background-color: #f1f1f1;
+}
+
+.room-management-dropdown button.delete {
+  color: #ff3333;
+}
+
+.room-management-dropdown.hidden {
+  display: none;
+}
+
+#roomManagementBtn {
+  position: absolute;
+  top: 90px;
+  background:#b5b6bbc1;
+  border: 1px dotted #d7d7d7;
+  cursor: pointer;
+  padding: 8px;
+  font-size: 18px;
+  color: #ffffff;
+  border-radius: 60%;
+  transition: background-color 0.2s;
+}
+
+#roomManagementBtn:hover {
+  background-color:#fce4e4;
+  color: #1f1e1e;
+}
+
+
 .time-display {
   display: flex; /* Make time elements horizontal */
   justify-content: space-between;
@@ -749,23 +872,40 @@ svg.point {
 }
 
 .bars {
-  /* border: solid 1px pink; */
-  /* width: 100%; */
   display: flex;
-  justify-content: space-between;
-  gap: 5px;
+  gap: 1px;
+  height: 20px;
+  width: 100%;
+  margin: 5px 0;
 }
 
 .bar {
-  display: inline-block;
-  height: 100%;
-  width: 1px;
-  background-color: #e7e7e7;
+  flex: 1;
+  background-color: #e0e0e0;
+  border-radius: 2px;
+  transition: background-color 0.3s;
+}
+
+.bar.active {
+  background-color: var(--cool-blue);
+}
+
+/* Animation for the active bar */
+@keyframes pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+.bar.current {
+  background-color: var(--warm-red);
+  animation: pulse 1.5s infinite;
 }
 
 .bars .bar:nth-child(n + 1):nth-child(-n + 15) {
-  background-color: #ffae33;
+  background-color: #ffc068;
 }
+
 
 .time {
   padding-left: 10px; /* Add spacing between times */
