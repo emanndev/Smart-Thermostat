@@ -326,7 +326,6 @@ if (coolInput.value < 10 || coolInput.value > 24 || warmInput.value < 25 || warm
 });
 
 // Rooms Control
-// Generate rooms
 const generateRooms = () => {
   const roomsControlContainer = document.querySelector(".rooms-control");
   let roomsHTML = "";
@@ -373,7 +372,7 @@ const generateRooms = () => {
       const isStartTime = e.target.classList.contains('start-time');
       const timeValue = e.target.textContent.trim();
       
-      // Validate itme format (HH:MM)
+      // Validate time format (HH:MM)
       if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(timeValue)) {
         if (isStartTime) {
           room.startTime = timeValue;
@@ -529,172 +528,7 @@ document.querySelector(".rooms-control").addEventListener("click", (e) => {
 
 //New features
 
-// Add Room Modal
-const addRoomModal = () => {
-  const modalHTML = `
-   <div class="modal hidden" id="roomModal">
-      <div class="modal-content animate__animated">
-        <h3>Add New Room</h3>
-        <div class="modal-inputs">
-          <input type="text" id="newRoomName" placeholder="Room name" required>
-          <div class="image-upload">
-            <label for="roomImage">Room Image:</label>
-            <input type="file" id="roomImage" accept="image/*">
-            <div class="image-preview hidden" id="imagePreview"></div>
-          </div>
-        </div>
-        <div class="modal-buttons">
-          <button id="addRoom" class="modal-btn confirm">Add Room</button>
-          <button id="cancelAddRoom" class="modal-btn cancel">Cancel</button>
-        </div>
-        <div class="modal-feedback hidden" id="modalFeedback"></div>
-        <span class="error" id="modalError"></span>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-  
-  document.querySelector(".text").insertAdjacentHTML('afterend', 
-    '<button id="showModal">+</button>');
-  
-  document.getElementById("showModal").addEventListener("click", () => {
-    const modal = document.getElementById("roomModal");
-    modal.classList.remove("hidden");
-    modal.querySelector(".modal-content").classList.add("animate__fadeInDown");
-  });
-    // Image preview functionality
-    document.getElementById("roomImage").addEventListener("change", function(e) {
-      const preview = document.getElementById("imagePreview");
-      const file = e.target.files[0];
-      
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          preview.innerHTML = `<img src="${e.target.result}" alt="Room preview">`;
-          preview.classList.remove("hidden");
-        }
-        reader.readAsDataURL(file);
-      }
-    });
-  document.getElementById("cancelAddRoom").addEventListener("click", () => {
-    const modalContent = document.querySelector(".modal-content");
-    modalContent.classList.remove("animate__fadeInDown");
-    modalContent.classList.add("animate__fadeOutUp");
-    
-    setTimeout(() => {
-      document.getElementById("roomModal").classList.add("hidden");
-      modalContent.classList.remove("animate__fadeOutUp");
-      resetModal();
-    }, 500);
-  });
-  
-  document.getElementById("addRoom").addEventListener("click", () => {
-    const name = document.getElementById("newRoomName").value.trim();
-    const imageInput = document.getElementById("roomImage");
-    const error = document.getElementById("modalError");
-    const feedback = document.getElementById("modalFeedback");
-    
-    // Validation
-    if (!name) {
-      error.textContent = "Please enter a room name";
-      return;
-    }
-    
-    if (rooms.some(r => r.name === name)) {
-      error.textContent = "Room already exists";
-      return;
-    }
-    
-    const newRoom = {
-      name,
-      currTemp: 22,
-      coldPreset: 20,
-      warmPreset: 28,
-      image: "./assets/default-room.jpg",
-      airConditionerOn: false,
-      startTime: '08:00',
-      endTime: '22:00',
-     
-    setCurrTemp(temp) {
-      this.currTemp = temp;
-    },
-
-    setColdPreset(newCold) {
-      this.coldPreset = newCold;
-    },
-
-    setWarmPreset(newWarm) {
-      this.warmPreset = newWarm;
-    },
-
-    decreaseTemp() {
-      this.currTemp--;
-    },
-
-    increaseTemp() {
-      this.currTemp++;
-    },
-    toggleAircon() {
-      this.airConditionerOn
-        ? (this.airConditionerOn = false)
-        : (this.airConditionerOn = true);
-    },
-    };
- // Handle image upload if available
- if (imageInput.files.length > 0) {
-  const file = imageInput.files[0];
-  const reader = new FileReader();
-  
-  reader.onload = function(e) {
-    newRoom.image = e.target.result; // Store as data URL
-    completeRoomAddition(newRoom, feedback);
-  };
-  reader.readAsDataURL(file);
-} else {
-  completeRoomAddition(newRoom, feedback);
-}
-});
-
-// Helper functions
-function completeRoomAddition(room, feedback) {
-rooms.push(room);
-
-// Add to dropdown
-const option = document.createElement("option");
-option.value = room.name;
-option.textContent = room.name;
-roomSelect.appendChild(option);
-
-// Show success feedback
-feedback.textContent = `${room.name} added successfully!`;
-feedback.className = "modal-feedback success";
-feedback.classList.remove("hidden");
-
-// Animate and close
-const modalContent = document.querySelector(".modal-content");
-modalContent.classList.remove("animate__fadeInDown");
-modalContent.classList.add("animate__bounce");
-
-setTimeout(() => {
-  document.getElementById("roomModal").classList.add("hidden");
-  modalContent.classList.remove("animate__bounce");
-  resetModal();
-  generateRooms();
-}, 1500);
-}
-
-function resetModal() {
-document.getElementById("newRoomName").value = "";
-document.getElementById("roomImage").value = "";
-document.getElementById("imagePreview").classList.add("hidden");
-document.getElementById("modalError").textContent = "";
-document.getElementById("modalFeedback").classList.add("hidden");
-}
-};
-
-
-
-// Click event handlers to time displays
+// Click event handlers for time displays
 const setupTimeDisplayInteractions = () => {
   document.querySelector('.rooms-control').addEventListener('click', (e) => {
     const timeElement = e.target.closest('.time');
@@ -811,15 +645,193 @@ const addAllACsButton = () => {
   });
 };
 
+//Add Room Modal
+const addRoomModal = () => {
+  const modalHTML = `
+    <div class="modal" id="roomModal">
+      <div class="modal-content">
+        <h3>Add New Room</h3>
+        <div class="modal-inputs">
+          <input type="text" id="newRoomName" placeholder="Room name (e.g., Office)" required>
+          <div class="image-upload">
+            <label for="roomImage">Room Image (Optional)</label>
+            <input type="file" id="roomImage" accept="image/*">
+            <div class="image-preview hidden" id="imagePreview"></div>
+          </div>
+        </div>
+        <div class="modal-buttons">
+          <button id="addRoom" class="modal-btn confirm">
+            <ion-icon name="add-circle-outline"></ion-icon> Add Room
+          </button>
+          <button id="cancelAddRoom" class="modal-btn cancel">
+            <ion-icon name="close-circle-outline"></ion-icon> Cancel
+          </button>
+        </div>
+        <div class="modal-feedback" id="modalFeedback"></div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  // Show modal button
+  document.querySelector(".text").insertAdjacentHTML('beforebegin', 
+    '<button id="showModal" title="Add new room"><ion-icon name="add-outline"></ion-icon></button>');
+  
+  // Modal toggle functionality
+  const modal = document.getElementById("roomModal");
+  const modalContent = modal.querySelector(".modal-content");
+  
+  document.getElementById("showModal").addEventListener("click", () => {
+    modal.classList.add("active");
+    modalContent.style.animation = "slideInDown 0.3s forwards";
+    console.log('clicked')
+  });
+  
+  // Image preview 
+  document.getElementById("roomImage").addEventListener("change", function(e) {
+    const preview = document.getElementById("imagePreview");
+    const file = e.target.files[0];
+    
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.innerHTML = `<img src="${e.target.result}" alt="Room preview">`;
+        preview.classList.remove("hidden");
+        preview.style.display = "block";
+      }
+      reader.readAsDataURL(file);
+    }
+  });
+  
+  // Close modal functionality
+  document.getElementById("cancelAddRoom").addEventListener("click", () => {
+    modalContent.style.animation = "slideOutUp 0.3s forwards";
+    setTimeout(() => {
+      modal.classList.remove("active");
+      resetModal();
+    }, 300);
+  });
+  
+  // Add room functionality
+  document.getElementById("addRoom").addEventListener("click", () => {
+    const name = document.getElementById("newRoomName").value.trim();
+    const imageInput = document.getElementById("roomImage");
+    const feedback = document.getElementById("modalFeedback");
+    
+    // Validation
+    if (!name) {
+      showFeedback(feedback, "Please enter a room name", "error");
+      return;
+    }
+    
+    if (rooms.some(r => r.name === name)) {
+      showFeedback(feedback, "Room already exists", "error");
+      return;
+    }
+    
+   
+    const newRoom = {
+      name,
+      currTemp: 22,
+      coldPreset: 20,
+      warmPreset: 28,
+      image: "./assets/default-room.jpg", 
+      airConditionerOn: false,
+      startTime: '08:00',
+      endTime: '22:00',
+   
+      setCurrTemp(temp) { this.currTemp = temp; },
+      setColdPreset(newCold) { this.coldPreset = newCold; },
+      setWarmPreset(newWarm) { this.warmPreset = newWarm; },
+      decreaseTemp() { this.currTemp--; },
+      increaseTemp() { this.currTemp++; },
+      toggleAircon() { this.airConditionerOn = !this.airConditionerOn; }
+    };
+    
+    // Handle image upload 
+    if (imageInput.files.length > 0) {
+      const file = imageInput.files[0];
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        newRoom.image = e.target.result;
+        completeRoomAddition(newRoom, feedback);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      completeRoomAddition(newRoom, feedback);
+    }
+  });
+  
+  // Helper functions
+  function completeRoomAddition(room, feedback) {
+    rooms.push(room);
+    
+    // Add to dropdown
+    const option = document.createElement("option");
+    option.value = room.name;
+    option.textContent = room.name;
+    roomSelect.appendChild(option);
+    
+    // Success feedback
+    showFeedback(feedback, `${room.name} added successfully!`, "success");
+    modalContent.classList.add("animate-bounce");
+    
+    // Close after delay
+    setTimeout(() => {
+      modalContent.style.animation = "slideOutUp 0.3s forwards";
+      setTimeout(() => {
+        modal.classList.remove("active");
+        resetModal();
+        generateRooms();
+      }, 300);
+    }, 1500);
+  }
+  
+  function showFeedback(element, message, type) {
+    element.textContent = message;
+    element.className = "modal-feedback show " + type;
+    element.innerHTML = `<ion-icon name="${type === 'success' ? 'checkmark-circle' : 'alert-circle'}"></ion-icon> ${message}`;
+    
+    // Auto-hide after 3 seconds if not successful
+    if (type !== 'success') {
+      setTimeout(() => {
+        element.classList.remove("show");
+      }, 3000);
+    }
+  }
+  
+  function resetModal() {
+    document.getElementById("newRoomName").value = "";
+    document.getElementById("roomImage").value = "";
+    document.getElementById("imagePreview").innerHTML = "";
+    document.getElementById("imagePreview").classList.add("hidden");
+    document.getElementById("modalFeedback").className = "modal-feedback";
+    modalContent.classList.remove("animate-bounce");
+  }
+  
+  // Close modal when clicking outside
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      modalContent.style.animation = "slideOutUp 0.3s forwards";
+      setTimeout(() => {
+        modal.classList.remove("active");
+        resetModal();
+      }, 300);
+    }
+  });
+};
 
 
-// Initialize
+// Initialize Time display 
 setupTimeDisplayInteractions();
 setInterval(checkScheduledTimes, 60000);
 
 // Initialize new features
 addRoomModal();
 addAllACsButton();
+
 
 // Initialize rooms display
 generateRooms();
