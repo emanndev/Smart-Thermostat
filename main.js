@@ -308,17 +308,11 @@ document.getElementById("save").addEventListener("click", () => {
   const errorSpan = document.querySelector(".error");
 
 // Fix bug 1 - change the range of temperatures and display valid error message
-  if (coolInput.value && warmInput.value) {
-    // Validate the data
-    if (coolInput.value < 10 || coolInput.value > 24) { 
-      errorSpan.style.display = "block";
-      errorSpan.innerText = "Enter valid temperatures (10° - 24°)";
-    }
-
-    if (warmInput.value < 25 || warmInput.value > 32) {
-      errorSpan.style.display = "block";
-      errorSpan.innerText = "Enter valid temperatures (25° - 32°)";
-    }
+if (coolInput.value < 10 || coolInput.value > 24 || warmInput.value < 25 || warmInput.value > 32) {
+  errorSpan.style.display = "block";
+  errorSpan.innerText = "Cool: 10-24°, Warm: 25-32°";
+  return;
+}
     // Validation passed
     // Set current room's presets
     const currRoom = rooms.find((room) => room.name === selectedRoom);
@@ -329,7 +323,6 @@ document.getElementById("save").addEventListener("click", () => {
     warmInput.value = "";
      errorSpan.style.display = "none";
      inputsDiv.classList.add("hidden");
-  }
 });
 
 // Rooms Control
@@ -340,7 +333,7 @@ const generateRooms = () => {
 
   rooms.forEach((room) => {
     roomsHTML += `
-  <div class="room-control" id="${room.name}">
+ <div class="room-control" id="${room.name}">
       <div class="top">
         <h3 class="room-name">${room.name} - ${room.currTemp}°</h3>
         <button class="switch">
@@ -353,20 +346,18 @@ const generateRooms = () => {
           ${Array(32).fill('<span class="bar"></span>').join('')}
         </div>
         <span class="time end-time" contenteditable="true">${room.endTime}</span>
-      </div>   
+      </div>
       <div class="schedule-toggle">
         <label class="switch">
           <input type="checkbox" ${room.scheduleActive ? "checked" : ""} data-room="${room.name}">
           <span class="slider round"></span>
         </label>
         <span>Auto Schedule</span>
-      </div>      
-          <span class="room-status" style="display: ${ //Bug 5 - fix the room status display
-            room.airConditionerOn ? "" : "none"
-          }">${room.currTemp > 25 ? "Warming room to: " : "Cooling room to: "}${
-      room.currTemp
-    }°</span>
-        </div>
+      </div>
+      <span class="room-status" style="display: ${room.airConditionerOn ? "" : "none"}">
+        ${room.airConditionerOn ? (room.currTemp > 25 ? "Warming room to: " : "Cooling room to: ") + room.currTemp + "°" : ""}
+      </span>
+    </div>
     `;
   });
 
@@ -536,9 +527,9 @@ document.querySelector(".rooms-control").addEventListener("click", (e) => {
   }
 });
 
-//Add Room Modal
+//New features
 
-// 1. Add Room Modal
+// Add Room Modal
 const addRoomModal = () => {
   const modalHTML = `
     <div class="modal hidden" id="roomModal">
@@ -691,14 +682,71 @@ const checkScheduledTimes = () => {
   });
 };
 
+// Global ACs Button functionality
+
+const addAllACsButton = () => {
+  // Remove if buttons already exist
+  const existingControls = document.querySelector('.global-ac-controls');
+  if (existingControls) existingControls.remove();
+
+  // Create control container
+  const controlsDiv = document.createElement('div');
+  controlsDiv.className = 'global-ac-controls';
+  
+  // Turn On All button
+  const allOnBtn = document.createElement('button');
+  allOnBtn.id = 'allACsOn';
+  allOnBtn.className = 'circle-btn';
+  allOnBtn.title = 'Turn On All ACs';
+  allOnBtn.innerHTML = '<ion-icon name="power-outline"></ion-icon>';
+  allOnBtn.innerHTML = '<ion-icon name="flash-outline"></ion-icon>';
+ 
+  // Turn Off All button
+  const allOffBtn = document.createElement('button');
+  allOffBtn.id = 'allACsOff';
+  allOffBtn.className = 'circle-btn';
+  allOffBtn.title = 'Turn Off All ACs';
+  allOffBtn.innerHTML = '<ion-icon name="power-outline"></ion-icon>';
+  allOffBtn.innerHTML = '<ion-icon name="flash-off-outline"></ion-icon>';
+
+  controlsDiv.appendChild(allOnBtn);
+  controlsDiv.appendChild(allOffBtn);
+  
+  // Inserting into DOM before default-settings section
+  document.querySelector('.default-settings').before(controlsDiv);
+  if (defaultSettings) {
+    defaultSettings.insertAdjacentElement('beforebegin', controlsDiv);
+  } else {
+    console.error('Could not find .default-settings element');
+  }
+
+  // Event handlers
+  allOnBtn.addEventListener('click', () => {
+    rooms.forEach(room => room.airConditionerOn = true);
+    generateRooms();
+    allOnBtn.classList.add('active');
+    
+    allOnBtn.classList.add('active');
+    setTimeout(() => allOnBtn.classList.remove('active'), 1000);
+  });
+  
+  allOffBtn.addEventListener('click', () => {
+    rooms.forEach(room => room.airConditionerOn = false);
+    generateRooms();
+    allOffBtn.classList.add('active');
+    setTimeout(() => allOffBtn.classList.remove('active'), 1000);
+  });
+};
+
+
 
 // Initialize
 setupTimeDisplayInteractions();
-setInterval(checkScheduledTimes, 60000); // Check every minute
+setInterval(checkScheduledTimes, 60000);
 
 // Initialize new features
 addRoomModal();
-addScheduling();
+addAllACsButton();
 
 // Initialize rooms display
 generateRooms();

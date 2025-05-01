@@ -66,6 +66,10 @@ body {
 
 
 
+
+
+
+
 /* Modal Styles */
 .modal {
   position: fixed;
@@ -120,18 +124,98 @@ body {
   width: 50px;
   height: 50px;
   border-radius: 50%;
+  border: none;
   background: var(--cool-blue);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all 0.3s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .circle-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
+
+.circle-btn ion-icon {
+  font-size: 24px;
+}
+
+#allACs {
+  background: var(--cool-blue);
+}
+#allACsOn { background: var(--cool-blue); }
+
+#allACs.active {
+  background: #4CAF50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
+}
+
+#allACsOff {
+  background: #f44336;
+}
+
+#allACsOff.active {
+  background: #d32f2f;
+  box-shadow: 0 0 10px rgba(211, 47, 47, 0.7);
+}
+
+
+/* Time editing styles */
+.time {
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.time:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.time-edit {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 2px;
+  font-family: inherit;
+  width: 70px;
+}
+
+/* Schedule preset selector */
+.schedule-preset {
+  margin-top: 10px;
+}
+
+.preset-select {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+}
+
+
+
+/* Button Styles */
+#allACs, #showModal, #showSchedule {
+  background: var(--cool-blue);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 5px 0;
+}
+
+#allACs:hover, #showModal:hover, #showSchedule:hover {
+  background: #3a4da8;
+}
+
+
+
 
 
 #rooms {

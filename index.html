@@ -123,7 +123,32 @@
         class="container rooms-control animate__animated animate__fadeIn"
       ></div>
     </div>
+    <!-- Add this scheduling interface -->
+<div class="schedule hidden" id="scheduleInterface">
+  <h3>Schedule AC</h3>
+  <div class="time-inputs">
+    <label>Start Time: <input type="time" id="startTime"></label>
+    <label>End Time: <input type="time" id="endTime"></label>
+    <select id="schedulePreset">
+      <option value="cool">Cool</option>
+      <option value="warm">Warm</option>
+    </select>
+  </div>
+  <button id="saveSchedule">Save Schedule</button>
+  <button id="cancelSchedule">Cancel</button>
+</div>
 
+
+   <!-- Add this modal structure at the bottom of body -->
+<div class="modal hidden" id="roomModal">
+  <div class="modal-content">
+    <h3>Add New Room</h3>
+    <input type="text" id="newRoomName" placeholder="Room name">
+    <button id="addRoom">Add Room</button>
+    <button id="cancelAddRoom">Cancel</button>
+    <span class="modal-error"></span>
+  </div>
+</div>
     <!-- Ionicons -->
     <script
       type="module"
