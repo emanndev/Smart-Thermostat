@@ -220,6 +220,7 @@ function updateRoomDisplay(room) {
   setOverlay(room);
   setIndicatorPoint(room.currTemp);
   generateRooms();
+  WeatherEffects.checkTemperatureEffects();
 }
 
 
@@ -299,15 +300,20 @@ defaultSettings.addEventListener("click", function (e) {
   
   if (target?.id === 'cool') {
     room.setCurrTemp(room.coldPreset);
-    document.getElementById("cool").style.backgroundColor = "#c2c2c2";
+    document.getElementById("cool").style.backgroundColor = "#4458c3";
+    document.getElementById("cool").style.color = "#ffffff";
     document.getElementById("warm").style.backgroundColor = "#d9d9d9";
     updateRoomDisplay(room);
+    WeatherEffects.checkTemperatureEffects();
   } else if (target?.id === 'warm') {
     room.setCurrTemp(room.warmPreset);
-    document.getElementById("warm").style.backgroundColor = "#c2c2c2";
+    document.getElementById("warm").style.backgroundColor = "#ec6062";
+    document.getElementById("warm").style.color = "#ffffff";
     document.getElementById("cool").style.backgroundColor = "#d9d9d9";
     updateRoomDisplay(room);
+    WeatherEffects.checkTemperatureEffects();
   }
+  
 });
 
 // Increase and decrease temperature
@@ -318,6 +324,7 @@ document.getElementById("increase").addEventListener("click", () => {
     room.increaseTemp(); 
     updateRoomDisplay(room);  
     saveRoomsToStorage();
+    WeatherEffects.checkTemperatureEffects();
   }
 });
 
@@ -328,6 +335,7 @@ document.getElementById("reduce").addEventListener("click", () => {
     room.decreaseTemp(); 
     updateRoomDisplay(room);
     saveRoomsToStorage();
+    WeatherEffects.checkTemperatureEffects();
   }
 
  });
@@ -505,6 +513,7 @@ document.querySelector(".rooms-control").addEventListener("click", (e) => {
     );
     room.toggleAircon();
     generateRooms();
+    WeatherEffects.checkTemperatureEffects();
   }
 
   if (e.target.classList.contains("room-name")) {
@@ -923,6 +932,90 @@ function updateVisualTimers() {
     });
   });
 }
+
+// Weather effects controller
+const WeatherEffects = {
+  activeEffects: [],
+  coldThreshold: 25,
+  effectInterval: null,
+
+  init() {
+    this.checkTemperatureEffects();
+    setInterval(() => this.checkTemperatureEffects(), 5000);
+  },
+
+  checkTemperatureEffects() {
+    const activeRoom = rooms.find(room => room.name === selectedRoom);
+    if (!activeRoom || !activeRoom.airConditionerOn) {
+      this.clearEffects();
+      return;
+    }
+
+    if (activeRoom.currTemp < this.coldThreshold) {
+      this.showSnowEffect();
+    } else {
+      this.showHeatEffect();
+    }
+  },
+
+  showSnowEffect() {
+    this.clearEffects();
+    this.effectInterval = setInterval(() => this.createSnowflake(), 300);
+  },
+
+  showHeatEffect() {
+    this.clearEffects();
+    this.effectInterval = setInterval(() => this.createHeatWave(), 500);
+  },
+
+  createSnowflake() {
+    const snowflake = document.createElement('div');
+    snowflake.className = 'weather-effect snowflake';
+    snowflake.innerHTML = '❄';
+    snowflake.style.left = `${Math.random() * 100}vw`;
+    snowflake.style.fontSize = "70px";
+    snowflake.style.color = "#AFDBF5";
+    snowflake.style.animationDuration = `${8 + Math.random() * 7}s`;
+    document.body.appendChild(snowflake);
+    this.activeEffects.push(snowflake);
+
+    // Remove after animation completes
+    setTimeout(() => {
+      snowflake.remove();
+      this.activeEffects = this.activeEffects.filter(e => e !== snowflake);
+    }, 15000);
+  },
+
+  createHeatWave() {
+    const heatWave = document.createElement('div');
+    heatWave.className = 'weather-effect heat-wave';
+    heatWave.style.left = `${10 + Math.random() * 80}vw`;
+    heatWave.style.top = `${10 + Math.random() * 80}vh`;
+    heatWave.style.animationDuration = `${2 + Math.random() * 3}s`;
+    document.body.appendChild(heatWave);
+    this.activeEffects.push(heatWave);
+
+    // Remove after animation completes
+    setTimeout(() => {
+      heatWave.remove();
+      this.activeEffects = this.activeEffects.filter(e => e !== heatWave);
+    }, 5000);
+  },
+
+  clearEffects() {
+    if (this.effectInterval) {
+      clearInterval(this.effectInterval);
+      this.effectInterval = null;
+    }
+    this.activeEffects.forEach(effect => effect.remove());
+    this.activeEffects = [];
+  }
+};
+
+// Initialize weather effects
+WeatherEffects.init();
+
+
 
 // Update the visual timers every minute
 setInterval(updateVisualTimers, 60000);
