@@ -90,9 +90,25 @@ body {
   border-radius: 8px;
   width: 90%;
   max-width: 400px;
+  height: 250px;
+}
+.modal-content h3{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0 15px 0;
+  font-size: 20px;
+  color: var(--text-primary);
 }
 
-.modal-buttons, .schedule-buttons {
+.modal-buttons{
+  position: absolute;
+  top: 30%;
+  right: 30%;
+  left: 50%;
+}
+
+.schedule-buttons {
   display: flex;
   gap: 10px;
   margin-top: 15px;
