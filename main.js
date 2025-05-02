@@ -371,6 +371,7 @@ if (coolInput.value < 10 || coolInput.value > 24 || warmInput.value < 25 || warm
 }
     // Validation passed
     // Set current room's presets
+
     const currRoom = rooms.find((room) => room.name === selectedRoom);
     currRoom.setColdPreset(parseInt(coolInput.value));
     currRoom.setWarmPreset(parseInt(warmInput.value));
