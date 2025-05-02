@@ -12,22 +12,25 @@ This is a responsive thermostat control widget for a smart home system. It allow
 ├── main.js  
 ├── .github/  
 ├── .gitignore  
-├── babel.config.js  
 ├── package.json  
 ├── package-lock.json
 │  
 ├── Readme.md
-│tests/
+├──tests/
 │     └── main.test.js
 ├── __mocks__/
+│    └── domMock.js
+│    └── fileMock.js
+│    └── localStorage.js
+│    └── styleMock.js
 ├── coverage
-└── jest.setup.js
+└── setupTests.js
 └── assets/
     └── bathroom.jpg
-    ├── bedroom.jpg
-    ├── indicator.svg
-    ├── kitchen.jpg
-    ├── living-room.jpg
+    └── bedroom.jpg
+    └── indicator.svg
+    └── kitchen.jpg
+    └── livingroom.jpg
     └── point.svg
 
 ## 🛠️ Features
