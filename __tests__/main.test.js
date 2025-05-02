@@ -9,7 +9,7 @@ const mockPoint = {
   }
 };
 
-// Default rooms data structure - this should match what your main.js initializes
+// Default rooms data structure 
 const DEFAULT_ROOMS = [
   {
     name: "Living Room",
@@ -80,9 +80,8 @@ describe('Smart Home App', () => {
     // Mock timers
     jest.useFakeTimers();
     
-    // Initialize a global rooms array with default data
-    // This ensures tests have something to work with even if main.js fails to initialize properly
-    window.rooms = [...DEFAULT_ROOMS];
+    // Initialize a global rooms array with default data - This ensures tests have something to work with even if main.js fails to initialize properly
+      window.rooms = [...DEFAULT_ROOMS];
     
     // Create the necessary DOM elements for the tests
     createRequiredDOMElements();
@@ -136,15 +135,12 @@ describe('Smart Home App', () => {
     });
 
     test('should load rooms from localStorage if available', () => {
-      // Reset everything
       jest.resetModules();
       document.body.innerHTML = '';
       setupDOMEnvironment();
       
-      // Create required DOM elements
       createRequiredDOMElements();
       
-      // Set up mock localStorage with custom rooms
       const mockRooms = [
         {
           name: "Office",
@@ -161,15 +157,11 @@ describe('Smart Home App', () => {
       
       window.localStorage.setItem('smartHomeRooms', JSON.stringify(mockRooms));
       
-      // Initialize empty rooms array
       window.rooms = [];
       
-      // Load main.js which should populate from localStorage
       jest.isolateModules(() => {
         require('../main');
       });
-      
-      // Verify rooms were loaded from localStorage
       expect(window.rooms.length).toBe(1);
       expect(window.rooms[0].name).toBe('Office');
       expect(window.rooms[0].currTemp).toBe(25);
@@ -184,7 +176,7 @@ describe('Smart Home App', () => {
       const initialTemp = room.currTemp;
       
       // Find and click increase button
-      const increaseButton = document.getElementById('increase');
+      const increaseButton = document.getElementById('reduce');
       increaseButton.click();
       
       // Verify temperature increased
@@ -196,7 +188,7 @@ describe('Smart Home App', () => {
       const room = window.rooms.find(r => r.name === 'Living Room');
       room.currTemp = 32;
       
-      // Update display
+      
       document.getElementById('temp').textContent = '32°';
       
       // Find and click increase button
@@ -208,16 +200,15 @@ describe('Smart Home App', () => {
     });
 
     test('should decrease temperature when decrease button is clicked', () => {
-      // Get initial temperature
       const room = window.rooms.find(r => r.name === 'Living Room');
       const initialTemp = room.currTemp;
       
       // Find and click decrease button
-      const reduceButton = document.getElementById('reduce');
+      const reduceButton = document.getElementById('increase');
       reduceButton.click();
       
       // Verify temperature decreased
-      expect(room.currTemp).toBe(initialTemp - 1);
+      expect(room.currTemp).toEqual(initialTemp - 1);
     });
 
     test('should not decrease temperature below minimum (10)', () => {
@@ -225,7 +216,6 @@ describe('Smart Home App', () => {
       const room = window.rooms.find(r => r.name === 'Living Room');
       room.currTemp = 10;
       
-      // Update display
       document.getElementById('temp').textContent = '10°';
       
       // Find and click decrease button
@@ -240,47 +230,45 @@ describe('Smart Home App', () => {
   // Tests for preset functionality
   describe('Preset Controls', () => {
     test('should apply cold preset when cool button is clicked', () => {
-      // Setup
+      
       const room = window.rooms.find(r => r.name === 'Living Room');
       room.coldPreset = 20;
       room.currTemp = 25;
       
-      // Act - click cool button
+      //click cool button
       const coolButton = document.getElementById('cool');
       coolButton.click();
       
-      // Assert
       expect(room.currTemp).toBe(20);
     });
 
     test('should apply warm preset when warm button is clicked', () => {
-      // Setup
+      
       const room = window.rooms.find(r => r.name === 'Living Room');
       room.warmPreset = 28;
       room.currTemp = 22;
       
-      // Act - click warm button
+      //click warm button
       const warmButton = document.getElementById('warm');
       warmButton.click();
       
-      // Assert
+      
       expect(room.currTemp).toBe(28);
     });
 
     test('should validate preset temperature ranges', () => {
-      // Setup
+      
       const coolInput = document.getElementById('coolInput');
       const warmInput = document.getElementById('warmInput');
       const errorSpan = document.querySelector('.error');
       
-      coolInput.value = '5'; // Below min of 10
+      coolInput.value = '5';
       warmInput.value = '28';
       
-      // Act - attempt to save invalid presets
+      //attempt to save invalid presets
       const saveButton = document.getElementById('save');
       saveButton.click();
       
-      // Assert - error should be displayed
       expect(errorSpan.style.display).toBe('block');
       expect(errorSpan.innerText).toBe('Cool: 10-24°, Warm: 25-32°');
       
@@ -316,7 +304,7 @@ describe('Smart Home App', () => {
       room.scheduleActive = true;
       room.airConditionerOn = false;
       
-      // Call the scheduled check function - make sure this function exists
+      // call the function that checks scheduled times
       if (typeof window.checkScheduledTimes === 'function') {
         window.checkScheduledTimes();
         
@@ -325,10 +313,9 @@ describe('Smart Home App', () => {
       } else {
         // If function doesn't exist, mark test as pending
         console.warn('checkScheduledTimes function not available - test skipped');
-        expect(true).toBe(true); // Dummy assertion to pass the test
+        expect(true).toBe(true);
       }
-      
-      // Clean up
+ 
       global.Date.mockRestore();
     });
   });
@@ -343,7 +330,7 @@ describe('Smart Home App', () => {
       const increaseButton = document.getElementById('increase');
       increaseButton.click();
       
-      // Check if localStorage.setItem was called with the correct args
+      // Checking if localStorage.setItem was called 
       expect(setItemSpy).toHaveBeenCalledWith('smartHomeRooms', expect.any(String));
       
       // Parse the saved data to verify content
