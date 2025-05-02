@@ -7,33 +7,21 @@ This is a responsive thermostat control widget for a smart home system. It allow
 ## 📁 Project Structure
 
 ├── index.html
-├── Bugs.md 
-│   
-├── style.css
-│   
-├── main.js
-│   
-├── .github/
-│   
-├── .gitignore
-│   
-├── babel.config.js
-│   
-├── package.json
-│   
+├── Bugs.md
+├── style.css  
+├── main.js  
+├── .github/  
+├── .gitignore  
+├── babel.config.js  
+├── package.json  
 ├── package-lock.json
 │  
 ├── Readme.md
-│ 
 │tests/
 │     └── main.test.js
-│ 
-├── __mocks__/ 
-│      
+├── __mocks__/
 ├── coverage
-│ 
-└── jest.setup.js 
-│       
+└── jest.setup.js
 └── assets/
     └── bathroom.jpg
     ├── bedroom.jpg
